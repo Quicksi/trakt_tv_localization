@@ -17,7 +17,10 @@ Requirements:
 Features:
 - Translates movie titles on https://trakt.tv/movies/
 - When no translation is found, "(en)" is added to the original title to let you know
-- In details page (one movies details), both, the localized and the original title are displayed
+- In details page (one movie's details):
+- - both, the localized and the original title are displayed
+- - localized Plot displayed
+- - TMDB Rating added
 - No! Tv Shows are not working yet! Will be added some time - perhaps ;)
 
 Configuration:
