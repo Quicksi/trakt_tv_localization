@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name Trakt.tv localization
 // @namespace https://github.com/Quicksi/trakt_tv_localization
-// @version 0.1
+// @version 0.2
 // @description Translates stuff on trakt.tv to other languages
 // @match https://trakt.tv/movies/*
 // @copyright 2017+, Quicks
@@ -108,9 +108,22 @@ function translateMe() {
 
                 // Get German title from TMDB
                 getTMDBDataById(tmdb_id).done( function(promise) {
-                    // set neElement to Original title
+                    console.log(promise);
+                    // set newElement to Original title
                     newElement.innerHTML = 'Original title: ' + elemID[0].firstChild.firstChild.data;
                     elemID[0].firstChild.firstChild.data = promise.title + ' ';
+                    lastTitle = elemID[0].firstChild.firstChild.data;
+
+                    // Add German Plot
+                    plotDiv = $('div[itemprop="description"]');
+                    plot = $(plotDiv).html();
+                    plot += '<br /><br />Localized:<br />' + promise.overview;
+                    $(plotDiv).html(plot);
+
+                    // Add TMDB Rating
+                    var newLi=document.createElement("li");
+                    newLi.innerHTML = '<div class="number"><div class="rating">' + promise.vote_average + '/' + promise.vote_count + '</div><div class="votes">TMDB</div></div>';
+                    $(".ratings")[0].append(newLi);
                 });
 
                 // Add element to DOM
