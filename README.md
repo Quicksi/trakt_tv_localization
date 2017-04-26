@@ -15,22 +15,26 @@ Requirements:
   Further information: https://www.themoviedb.org/faq/api
 
 Features:
-- Translates movie titles on https://trakt.tv/movies/
-- When no translation is found, "(en)" is added to the original title to let you know
-- In details page (one movie's details):
-- - both, the localized and the original title are displayed
-- - localized Plot displayed
-- - TMDB Rating added
+- On movies overview:
+ - Translates movie titles to choosen language
+ - original title is displayed in brackets below
+ - added TMDB Rating after Trakt Rating
+- On movie's detail page:
+ - Translates movie titles to choosen language
+ - original title is displayed below localized title
+ - localized plot is displayed below original plot
+ - poster is localized
+ - Trailers: Link to search on youtube for trailers in your language added in video section (below plot)
+ - TMDB Rating added
 - No! Tv Shows are not working yet! Will be added some time - perhaps ;)
 
 Configuration:
 - At the top of the scriptfile there are two variables to configure your prefered language and enter your TMDB-Api-Key.
-  Should be self-explained.
+ - tmdb_api_key: Your TMDB-Api-Key (get it for free here: https://www.themoviedb.org/faq/api)
+ - language: language code to be used on TMDB
+ - langtext: used in search query for localized Youtube Trailer
 
 Known Issues:
-- Irrespective of how you call trakt.tv you get redirected to https://trakt.tv/.
-  Cause of trakt is totally AJAX driven you have to reload the site manually when not entered it using "https://trakt.tv/".
-  Otherwise the script won't be loaded.
 - TMDB allows 40 request every 10 seconds.
   Trakt's movies overview contains 38 movies.
   So be a bit patient and stay on each page at least 10 seconds ;).
