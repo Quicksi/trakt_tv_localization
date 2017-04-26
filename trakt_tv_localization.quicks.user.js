@@ -1,9 +1,9 @@
 // ==UserScript==
 // @name Trakt.tv localization
 // @namespace https://github.com/Quicksi/trakt_tv_localization
-// @version 0.3
+// @version 0.4
 // @description Translates stuff on trakt.tv to other languages
-// @match https://trakt.tv/movies/*
+// @match *://*trakt.tv/*
 // @copyright 2017+, Quicks
 // @require http://code.jquery.com/jquery-latest.js
 // @run-at document-end
@@ -12,6 +12,7 @@
 // CONFIG
 var tmdb_api_key = '';
 var language = 'de';
+var langtext = 'Deutsch';
 
 // VARIABLES
 var isActive = true;
@@ -37,9 +38,6 @@ function getTMDBDataByNameYear(title, year){
     });
     return promise;
 }
-
-// OBSERVERS
-
 
 // TRANSLATOR
 function transMovieOverview() {
@@ -95,15 +93,16 @@ function transMovieOverview() {
 }
 
 function transSingleMovie() {
-    elemID=document.getElementsByClassName("mobile-title");
+    elemID = $('.mobile-title');
     // check last title
     if ( elemID[0].firstChild.firstChild.data != lastTitle )
     { // last Title changed
         // set new lastTitle
         lastTitle = elemID[0].firstChild.firstChild.data;
 
-        // Translate now!
-        //console.log('translate of one');
+        // get Data from DOM for later use
+        tl_title_org = $(elemID)[0].firstChild.firstChild.data;
+        tl_year = $(elemID).find('.year').html();
 
         sem = false;
         // find TMDB ID
@@ -115,9 +114,9 @@ function transSingleMovie() {
 
         // Get German title from TMDB
         getTMDBDataById(tmdb_id).done( function(promise) {
-            //console.log(promise);
+            console.log(promise);
             // set newElement to Original title
-            newElement.innerHTML = 'Original title: ' + elemID[0].firstChild.firstChild.data;
+            newElement.innerHTML = 'Original title: ' + tl_title_org;
 
             // Set localized title
             elemID[0].firstChild.firstChild.data = promise.title + ' ';
@@ -126,13 +125,33 @@ function transSingleMovie() {
             // Add localized Plot
             plotDiv = $('div[itemprop="description"]');
             plot = $(plotDiv).html();
-            plot += '<br /><br />Localized:<br />' + promise.overview;
+            plot += '<br /><br />' + langtext + ':<br />"' + promise.tagline + '"<br /><br />' + promise.overview;
             $(plotDiv).html(plot);
 
             // Add TMDB Rating
             var newLi=document.createElement("li");
             newLi.innerHTML = '<div class="number"><div class="rating">' + promise.vote_average + '/' + promise.vote_count + '</div><div class="votes">TMDB</div></div>';
             $(".ratings")[0].append(newLi);
+
+            // Add Youtube German Trailer Link
+            var newA=document.createElement("a");
+            $(newA).addClass('popup-video one-liner trailer');
+            $(newA).attr('target', '_blank');
+            $(newA).html('<div class="icon"><div class="fa fa-youtube-play"></div></div><div class="text"><div class="site">' + langtext + '</div></div>');
+            // buils query
+            yt_url = 'https://www.youtube.com/results?search_query=+';
+            yt_query = tl_title_org + ' ' + tl_year + ' Trailer ' + langtext;
+            yt_query = yt_query.replace(/ /g, '+');
+            // fill Query
+            $(newA).attr('href', yt_url + yt_query);
+            // append element to external-div
+            //$('.external')[0].firstChild.append(newA);
+            $('.affiliate-links')[0].firstChild.append(newA);
+
+            // replace poster
+            if ( promise.poster_path.startsWith('/') ) {
+                $('.sidebar').find('.poster').find('.real').attr('src', 'https://image.tmdb.org/t/p/w300_and_h450_bestv2' + promise.poster_path);
+            }
         });
 
         // Add element to DOM
@@ -146,14 +165,18 @@ function translateMe() {
         isActive = false;
         alert("Please define your TMDB Api Key and reload page");
     } else {
-        // Try to find a "mobile-title"-class ... if found,we are on single movie page
-        elemID=document.getElementsByClassName("mobile-title");
-        if ( elemID.length === 0 ) {
-            // here we are on movies overview
-            transMovieOverview();
-        } else {
-            // here we are on single movie page
-            transSingleMovie();
+        // get module
+        tl_path = $(location)[0].pathname;
+        if ( tl_path.startsWith('/movies') ) { // Movies
+            // Try to find a "mobile-title"-class ... if found,we are on single movie page
+            elemID=document.getElementsByClassName("mobile-title");
+            if ( elemID.length === 0 ) {
+                // here we are on movies overview
+                transMovieOverview();
+            } else {
+                // here we are on single movie page
+                transSingleMovie();
+            }
         }
     }
 }
