@@ -16,23 +16,23 @@ Requirements:
 
 Features:
 - On movies overview:
- - Translates movie titles to choosen language
- - original title is displayed in brackets below
- - added TMDB Rating after Trakt Rating
+  - Translates movie titles to choosen language
+  - original title is displayed in brackets below
+  - added TMDB Rating after Trakt Rating
 - On movie's detail page:
- - Translates movie titles to choosen language
- - original title is displayed below localized title
- - localized plot is displayed below original plot
- - poster is localized
- - Trailers: Link to search on youtube for trailers in your language added in video section (below plot)
- - TMDB Rating added
+  - Translates movie titles to choosen language
+  - original title is displayed below localized title
+  - localized plot is displayed below original plot
+  - poster is localized
+  - Trailers: Link to search on youtube for trailers in your language added in video section (below plot)
+  - TMDB Rating added
 - No! Tv Shows are not working yet! Will be added some time - perhaps ;)
 
 Configuration:
 - At the top of the scriptfile there are two variables to configure your prefered language and enter your TMDB-Api-Key.
- - tmdb_api_key: Your TMDB-Api-Key (get it for free here: https://www.themoviedb.org/faq/api)
- - language: language code to be used on TMDB
- - langtext: used in search query for localized Youtube Trailer
+  - tmdb_api_key: Your TMDB-Api-Key (get it for free here: https://www.themoviedb.org/faq/api)
+  - language: language code to be used on TMDB
+  - langtext: used in search query for localized Youtube Trailer
 
 Known Issues:
 - TMDB allows 40 request every 10 seconds.
