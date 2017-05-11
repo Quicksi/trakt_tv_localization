@@ -2,7 +2,7 @@
 
 www.trakt.tv is a realy great site to search and track movies and tv shows.
 But it's english only!
-It's hard to identify movies, if original and localized title differs.
+It's hard to identify movies / tv shows, if original and localized title differs.
 
 This small script crawls the active trakt.tv site and tries to change titles to your prefered language.
 The additional data is loaded from TMDB (https://www.themoviedb.org/).
@@ -15,18 +15,17 @@ Requirements:
   Further information: https://www.themoviedb.org/faq/api
 
 Features:
-- On movies overview:
+- On movies/tv shows overview:
   - Translates movie titles to choosen language
   - original title is displayed in brackets below
   - added TMDB Rating after Trakt Rating
-- On movie's detail page:
+- On movie's/tv show's detail page:
   - Translates movie titles to choosen language
   - original title is displayed below localized title
   - localized plot is displayed below original plot
   - poster is localized
   - Trailers: Link to search on youtube for trailers in your language added in video section (below plot)
   - TMDB Rating added
-- No! Tv Shows are not working yet! Will be added some time - perhaps ;)
 
 Configuration:
 - At the top of the scriptfile there are two variables to configure your prefered language and enter your TMDB-Api-Key.
