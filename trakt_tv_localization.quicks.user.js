@@ -22,25 +22,34 @@ var lastTitle2 = '';
 var sem = true;
 
 // AJAX FUNXTIONS
-function getTMDBDataById(tmdb_id){
+function getTMDBDataById(type, tmdb_id){
+    url = '';
+    if ( type == 'movies' ) url = 'https://api.themoviedb.org/3/movie/' + tmdb_id + '?api_key=' + tmdb_api_key + '&language=' + language;
+    if ( type == 'tv' ) url = 'https://api.themoviedb.org/3/tv/' + tmdb_id + '?api_key=' + tmdb_api_key + '&language=' + language;
+
     var promise = $.ajax ({
         type:       'GET',
-        url:        'https://api.themoviedb.org/3/movie/' + tmdb_id + '?api_key=' + tmdb_api_key + '&language=' + language,
+        url:        url,
         dataType:   'JSON'
     });
     return promise;
 }
-function getTMDBDataByNameYear(title, year){
+function getTMDBDataByNameYear(type, title, year){
+    url = '';
+    if ( type == 'movies' ) url = 'https://api.themoviedb.org/3/search/movie?api_key=' + tmdb_api_key + '&include_adult=true&language=' + language + '&query=' + title + '&year= ' + year;
+    if ( type == 'tv' ) url = 'https://api.themoviedb.org/3/search/tv?api_key=' + tmdb_api_key + '&include_adult=true&language=' + language + '&query=' + title + '&first_air_date_year= ' + year;
+
     var promise = $.ajax ({
         type:       'GET',
-        url:        'https://api.themoviedb.org/3/search/movie?api_key=' + tmdb_api_key + '&include_adult=true&language=' + language + '&query=' + title + '&year= ' + year,
+        url:        url,
         dataType:   'JSON'
     });
     return promise;
 }
 
 // TRANSLATOR
-function transMovieOverview() {
+
+function transOverview(type) {
     // Get all movies
     tl_movies = $('.grid-item');
 
@@ -50,9 +59,6 @@ function transMovieOverview() {
     { // last Title changed
         // set new lastTitle
         lastTitle = $(tl_movies[0]).find('.titles').children('h3')[0].childNodes[0].data;
-
-        // Translate now!
-        //console.log('translate of all');
 
         sem = false;
         tl_movies.each(function(index) {
@@ -65,9 +71,18 @@ function transMovieOverview() {
             year_org = $(titlesDiv).children('h3')[0].childNodes[1].innerHTML;
 
             // Get German Data
-            getTMDBDataByNameYear(title_org, year_org).done( function(promise) {
+            getTMDBDataByNameYear(type, title_org, year_org).done( function(promise) {
+                console.log(promise);
                 // check if title was found
                 if( promise.results.length > 0 ) {
+                    // get data with different keys
+                    if ( type == 'movies' ) {
+                        title_local = promise.results[0].title;
+                    }
+                    if ( type == 'tv' ) {
+                         title_local = promise.results[0].name;
+                    }
+
                     // Add h5 for org title
                     divOrgTitle = document.createElement("h5");
                     title_org = $(qsself[index]).find('.titles').children('h3')[0].firstChild.data;
@@ -75,7 +90,7 @@ function transMovieOverview() {
                     $(qsself[index]).find('.titles')[0].append(divOrgTitle);
 
                     // Translate title
-                    $(qsself[index]).find('.titles').children('h3')[0].firstChild.data = promise.results[0].title + ' ';
+                    $(qsself[index]).find('.titles').children('h3')[0].firstChild.data = title_local + ' ';
                     if (index === 0) lastTitle =  $(qsself[index]).find('.titles').children('h3')[0].firstChild.data;
 
                     // Add TMDB Rating
@@ -92,7 +107,7 @@ function transMovieOverview() {
     }
 }
 
-function transSingleMovie() {
+function transSingle(type) {
     elemID = $('.mobile-title');
     // check last title
     if ( elemID[0].firstChild.firstChild.data != lastTitle )
@@ -106,26 +121,47 @@ function transSingleMovie() {
 
         sem = false;
         // find TMDB ID
-        var tmdbLink = $('a[href^="https://www.themoviedb.org/movie/"]');
-        var tmdb_id = tmdbLink[0].href.substring(33);
+        var tmdbLink = '';
+        var tmdb_id =  '';
+        if ( type == 'movies' ) {
+            tmdbLink = $('a[href^="https://www.themoviedb.org/movie/"]');
+            tmdb_id = tmdbLink[0].href.substring(33);
+        }
+        if ( type == 'tv' ) {
+            tmdbLink = $('a[href^="https://www.themoviedb.org/tv/"]');
+            tmdb_id = tmdbLink[0].href.substring(30);
+        }
 
         // create new element for original title
         var newElement=document.createElement("span");
 
         // Get German title from TMDB
-        getTMDBDataById(tmdb_id).done( function(promise) {
+        getTMDBDataById(type, tmdb_id).done( function(promise) {
             console.log(promise);
+            // get data with different keys
+            if ( type == 'movies' ) {
+                title_local = promise.title;
+            }
+            if ( type == 'tv' ) {
+                title_local = promise.name;
+            }
+
             // set newElement to Original title
             newElement.innerHTML = 'Original title: ' + tl_title_org;
 
             // Set localized title
-            elemID[0].firstChild.firstChild.data = promise.title + ' ';
+            elemID[0].firstChild.firstChild.data = title_local + ' ';
             lastTitle = elemID[0].firstChild.firstChild.data;
 
-            // Add localized Plot
+            // Get localized Tagline
+            tl_tagline = '';
+            if ( type == 'movies' ) {
+                if ( promise.tagline.length > 0 ) tl_tagline = '"' + promise.tagline + '"<br /><br />';
+            }
+            // Add localized Tagline + Plot
             plotDiv = $('div[itemprop="description"]');
             plot = $(plotDiv).html();
-            plot += '<br /><br />' + langtext + ':<br />"' + promise.tagline + '"<br /><br />' + promise.overview;
+            plot += '<br /><br />' + langtext + ':<br />' + tl_tagline + promise.overview;
             $(plotDiv).html(plot);
 
             // Add TMDB Rating
@@ -134,19 +170,21 @@ function transSingleMovie() {
             $(".ratings")[0].append(newLi);
 
             // Add Youtube German Trailer Link
-            var newA=document.createElement("a");
-            $(newA).addClass('popup-video one-liner trailer');
-            $(newA).attr('target', '_blank');
-            $(newA).html('<div class="icon"><div class="fa fa-youtube-play"></div></div><div class="text"><div class="site">' + langtext + '</div></div>');
-            // buils query
-            yt_url = 'https://www.youtube.com/results?search_query=+';
-            yt_query = tl_title_org + ' ' + tl_year + ' Trailer ' + langtext;
-            yt_query = yt_query.replace(/ /g, '+');
-            // fill Query
-            $(newA).attr('href', yt_url + yt_query);
-            // append element to external-div
-            //$('.external')[0].firstChild.append(newA);
-            $('.affiliate-links')[0].firstChild.append(newA);
+            if ( type == 'movies' ) {
+                var newA=document.createElement("a");
+                $(newA).addClass('popup-video one-liner trailer');
+                $(newA).attr('target', '_blank');
+                $(newA).html('<div class="icon"><div class="fa fa-youtube-play"></div></div><div class="text"><div class="site">' + langtext + '</div></div>');
+                // buils query
+                yt_url = 'https://www.youtube.com/results?search_query=+';
+                yt_query = promise.title + ' ' + tl_year + ' Trailer ' + langtext;
+                yt_query = yt_query.replace(/ /g, '+');
+                // fill Query
+                $(newA).attr('href', yt_url + yt_query);
+                // append element to external-div
+                //$('.external')[0].firstChild.append(newA);
+                $('.affiliate-links')[0].firstChild.append(newA);
+            }
 
             // replace poster
             if ( promise.poster_path.startsWith('/') ) {
@@ -172,10 +210,21 @@ function translateMe() {
             elemID=document.getElementsByClassName("mobile-title");
             if ( elemID.length === 0 ) {
                 // here we are on movies overview
-                transMovieOverview();
+                transOverview('movies');
             } else {
                 // here we are on single movie page
-                transSingleMovie();
+                transSingle('movies');
+            }
+        }
+        if ( tl_path.startsWith('/shows') ) { // Movies
+            // Try to find a "mobile-title"-class ... if found,we are on single movie page
+            elemID=document.getElementsByClassName("mobile-title");
+            if ( elemID.length === 0 ) {
+                // here we are on movies overview
+                transOverview('tv');
+            } else {
+                // here we are on single movie page
+                transSingle('tv');
             }
         }
     }
